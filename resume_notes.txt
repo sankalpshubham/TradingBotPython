@@ -1,0 +1,1 @@
+Used Numpy, Pandas, TD Ameritrade API

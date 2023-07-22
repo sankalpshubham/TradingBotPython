@@ -130,5 +130,17 @@ class Indicators():
         return self._frame
 
     def refresh(self):
-        pass
+        # First Update the groups
+        self._price_groups = self._stock_frame.symbol_groups
 
+        # Loop through all the stored indicators
+        for indicator in self._current_indicators:
+            indicator_args = self._current_indicators[indicator]['args']
+            indicator_func = self._current_indicators[indicator]['func']
+
+            # Update the columns
+            indicator_func(**indicator_args)
+
+    def check_signals(self) -> Union[pd.DataFrame, None]:
+        signals_df = self._stock_frame._check_signals(indicators=self._indicator_signals)
+        return signals_df

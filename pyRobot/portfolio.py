@@ -1,4 +1,5 @@
 from typing import List, Dict, Union, Optional, Tuple
+from td.client import TDClient
 
 class Portfolio():
     def __init__(self, account_number: Optional[str]):
@@ -8,6 +9,7 @@ class Portfolio():
         self.market_value = 0.0
         self.profit_loss = 0.0
         self.risk_tolerance = 0.0
+        self._td_client: TDClient = None
 
     # to add one position
     def add_position(self, symbol: str, asset_type: str, purchase_date: Optional[str], quantity: int = 0, purchase_price: float = 0.0) -> dict:
@@ -50,6 +52,14 @@ class Portfolio():
         "get the pruchase price"
         purchase_price = self.positions[symbol]['purchase_price']
         return True if purchase_price <= current_price else False
+
+    @property
+    def td_client(self) -> TDClient:
+        return self._td_client
+
+    @td_client.setter
+    def td_client(self, td_client: TDClient) -> None:
+        self._td_client: TDClient = td_client
 
     def total_allocation(self):
         pass

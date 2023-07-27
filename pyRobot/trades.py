@@ -17,7 +17,7 @@ class Trade():
         self._multi_leg = False     # for multi leg order
         
 
-    def new_trade(self, trade_id: str, order_type: str, side: str, enter_or_exit: str, price: float = 0.00, stop_limit_price: float = 0.00) -> dict:
+    def new_trade(self, trade_id: str, order_type: str, long_or_short: str, enter_or_exit: str, price: float = 0.00, stop_limit_price: float = 0.00) -> dict:
         self.trade_id = trade_id
         self.order_type = {
             "mkt": "MARKET",
@@ -45,7 +45,7 @@ class Trade():
             "dudration": "DAY",
             "orderLegCollection": [
                 {
-                    "instruction": "self.order_instructions[enter_or_exit][side]",
+                    "instruction": self.order_instructions[enter_or_exit][long_or_short],
                     "quantity": 0,
                     "instrument": {
                         "symbol": None,
@@ -69,7 +69,7 @@ class Trade():
             self.order['stopType'] = 'STANDARD'
 
         self.enter_or_exit = enter_or_exit
-        self.side = side
+        self.side = long_or_short
         self.order_type = order_type
         self.price = price
 

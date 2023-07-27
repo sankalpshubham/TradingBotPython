@@ -128,3 +128,59 @@ new_trade.add_stop_loss(
 # Print out the order
 pprint.pp
 (new_trade.order)
+
+# Create a new indicator client
+indicator_client = Indicators(price_data_frame=stock_frame)
+
+# Add the RSI indicator
+indicator_client.rsi(period=14)
+# Add a 200 day SMA
+indicator_client.sma(period=200)
+# Add a 50 day EMA
+indicator_client.ema(period=50)
+
+# Add a signal to check for
+indicator_client.set_indicator_signals(
+    indicator='rsi',
+    buy=40.0,
+    sell=20.0,
+    condition_buy=operator.ge,
+    condition_sell=operator.le
+)
+
+# Define a trade dict
+trades_dict = {         # If the above indicator happens, this is the trade I want to use for MSFT
+    'MSFT': {
+        'trade_func': trading_robot.trades['long_msft'],            # this is a collection of trade objs
+        'trade_id': trading_robot.trades['long_msft'].trade_id
+    }
+}
+
+while True:
+    # Grab the latest bar
+    latest_bar = trading_robot.get_latest_bar()
+
+    # Add those bars to the StockFrame
+    stock_frame.add_rows(data=latest_bar)
+
+    # Refresh the indicators
+    indicator_client.refresh()
+
+    print("="*50)
+    print("Current StockFrame")
+    print("-"*50)
+    print(stock_frame.symbol_groups.tail())
+    print("-"*50)
+    print("")
+
+    # Check for signals
+    signals = indicator_client.check_signals()
+
+    # Execute trades
+    trading_robot.execute_signals(signals=signals, trades_to_execute=trades_dict)
+
+    # Grab the last bar, keep in mind this is after adding the new rows
+    last_bar_timestamp = trading_robot.stock_frame.frame.tail(1).index.get_level_values(1)
+
+    # Wait till the next bar
+    trading_robot.wait_till_next_bar(last_bar_timestamp=last_bar_timestamp)

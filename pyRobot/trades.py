@@ -323,3 +323,7 @@ class Trade():
     @property
     def number_of_legs(self) -> int:
         return len(self.order['orderLegCollection'])
+    
+    def _process_order_response(self) -> None:
+        self.order_id =  self._order_response["order_id"]
+        self.order_status = "QUEUED"

@@ -61,6 +61,14 @@ class Portfolio():
     def td_client(self, td_client: TDClient) -> None:
         self._td_client: TDClient = td_client
 
+    def set_ownership_status(self, symbol: str, ownership: bool) -> None:
+        if self.in_portfolio(symbol=symbol):
+            self.positions[symbol]['ownership_status'] = ownership
+        else:
+            raise KeyError(
+                "Can't set ownership status, as you do not have the symbol in your portfolio."
+            )
+    
     def total_allocation(self):
         pass
 

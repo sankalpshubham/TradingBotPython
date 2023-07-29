@@ -75,6 +75,11 @@ indicator_client.ema(period=50, column_name="ema")
 # print(stock_frame.frame.head())
 # print(stock_frame.frame.tail())
 
-
-
+# Add a Signal Check
+indicator_client.set_indicator_signal_compare(
+    indicator_1="sma_50",
+    indicator_2="sma_200",
+    condition_buy=operator.ge,      # if 1 > 2, buy
+    condition_sell=operator.le      # if 1 < 2, sell
+)
 

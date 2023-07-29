@@ -11,7 +11,7 @@ from pyRobot.indicators import Indicators
 
 # grab the config file values
 config = ConfigParser()
-config.read('configs/config.ini')
+config.read('config/config.ini')
 
 CLIENT_ID = config.get('main', 'CLIENT_ID')
 REDIRECT_URI = config.set('main', 'REDIRECT_URI')

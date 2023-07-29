@@ -12,6 +12,8 @@ class Indicators():
         self._price_groups = price_data_frame.symbol_groups
         self._current_indicators = {}
         self._indicator_signals = {}
+        self._indicators_comp_key = []
+        self._indicators_key = []
         self._frame = self._stock_frame.frame
 
     def set_indicator_signals(self, indicator: str, buy: float, sell: float, condition_buy: Any, condition_sell: Any) -> None:
@@ -31,6 +33,27 @@ class Indicators():
         else:
             return self._indicator_signals
         
+    def set_indicator_signal_compare(self, indicator_1: str, indicator_2: str, condition_buy: Any, condition_sell: Any) -> None:
+        key = "{ind_1}_comp_{ind_2}".format(
+            ind_1=indicator_1,
+            ind_2=indicator_2
+        )
+
+        # Add the key if it doesn't exist.
+        if key not in self._indicator_signals:
+            self._indicator_signals[key] = {}
+            self._indicators_comp_key.append(key)   
+
+        # Grab the dictionary.
+        indicator_dict = self._indicator_signals[key]
+
+        # Add the signals.
+        indicator_dict['type'] = 'comparison'
+        indicator_dict['indicator_1'] = indicator_1
+        indicator_dict['indicator_2'] = indicator_2
+        indicator_dict['buy_operator'] = condition_buy
+        indicator_dict['sell_operator'] = condition_sell
+
     @property
     def price_data_frame(self) -> pd.DataFrame:
         return self._frame
@@ -142,5 +165,9 @@ class Indicators():
             indicator_func(**indicator_args)
 
     def check_signals(self) -> Union[pd.DataFrame, None]:
-        signals_df = self._stock_frame._check_signals(indicators=self._indicator_signals)
+        signals_df = self._stock_frame._check_signals(
+            indicators=self._indicator_signals,
+            indciators_comp_key=self._indicators_comp_key,
+            indicators_key=self._indicators_key
+            )
         return signals_df

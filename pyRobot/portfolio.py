@@ -1,5 +1,6 @@
 from typing import List, Dict, Union, Optional, Tuple
 from td.client import TDClient
+from pyRobot.stock_frame import StockFrame
 
 class Portfolio():
     def __init__(self, account_number: Optional[str]):
@@ -9,7 +10,10 @@ class Portfolio():
         self.market_value = 0.0
         self.profit_loss = 0.0
         self.risk_tolerance = 0.0
+        
         self._td_client: TDClient = None
+        self._stock_frame: StockFrame = None
+        self._historical_prices = []
 
     # to add one position
     def add_position(self, symbol: str, asset_type: str, purchase_date: Optional[str], quantity: int = 0, purchase_price: float = 0.0) -> dict:
@@ -60,6 +64,14 @@ class Portfolio():
     @td_client.setter
     def td_client(self, td_client: TDClient) -> None:
         self._td_client: TDClient = td_client
+
+    @property
+    def historical_prices(self) -> List[dict]:
+        return self._historical_prices
+    
+    @property
+    def stock_frame(self) -> StockFrame:
+        return self._stock_frame
 
     def set_ownership_status(self, symbol: str, ownership: bool) -> None:
         if self.in_portfolio(symbol=symbol):

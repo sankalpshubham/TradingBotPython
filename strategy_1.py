@@ -9,6 +9,7 @@ from configparser import ConfigParser
 from pyRobot.robot import PyRobot
 from pyRobot.indicators import Indicators
 from pyRobot.trades import Trade
+from td.client import TDClient
 
 # Read the Config File
 config = ConfigParser()
@@ -83,3 +84,69 @@ indicator_client.set_indicator_signal_compare(
     condition_sell=operator.le      # if 1 < 2, sell
 )
 
+# Create a new Trade Object for Entering a position
+new_long_trade = trading_robot.create_trade(
+    trade_id='long_enter',
+    enter_or_exit='enter',        # We are entering long position here
+    long_or_short='long',
+    order_type='mkt'
+)
+
+# Add an Order Leg
+new_long_trade.instrument(
+    symbol=trading_symbol,
+    quantity=1,
+    asset_type='EQUITY'         # Equities for this example
+)
+
+# Create a new Trade Object for Exiting a position
+new_exit_trade = trading_robot.create_trade(
+    trade_id='long_exit',
+    enter_or_exit='exit',        # We are entering long position here
+    long_or_short='long',
+    order_type='mkt'
+)
+
+# Add an Order Leg
+new_long_trade.instrument(
+    symbol=trading_symbol,
+    quantity=1,
+    asset_type='EQUITY'         # Equities for this example
+)
+
+# Saving the order in a json file
+def default(obj):
+    if isinstance(obj, TDClient):
+        return str(obj)
+
+# Save Order
+with open(file='order_strategies.jsonc', mode='+w') as order_file:
+    json.dump(
+        obj=[new_long_trade.to_dict(), new_exit_trade.to_dict()],   # serialize this
+        fp=order_file,
+        default=default,
+        indent=4
+    )
+
+
+# Define a trading dictionary
+trades_dict = {
+    trading_symbol: {
+        'buy': {
+            'trade_func': trading_robot.trades['long_enter'],
+            'trade_id': trading_robot.trades['long_enter'].trade_id
+        },
+        'sell': {
+            'trade_func': trading_robot.trades['long_exit'],
+            'trade_id': trading_robot.trades['long_exit'].trade_id
+        }
+    }
+}
+
+# Define the ownership (ideally should keep this in trades_dict instead of creating a new one)
+ownership_dict = {
+    trading_symbol: False
+}
+
+# Intialize a Order Variable
+order = None

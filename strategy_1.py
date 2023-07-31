@@ -4,6 +4,7 @@ import pandas as pd
 import operator
 
 from datetime import datetime, timedelta
+import time
 from configparser import ConfigParser
 
 from pyRobot.robot import PyRobot
@@ -150,3 +151,76 @@ ownership_dict = {
 
 # Intialize a Order Variable
 order = None
+
+
+# start trading and implement the strategy
+while trading_robot.regular_market_open:
+    # Grab the latest bar
+    latest_bar = trading_robot.get_latest_bar()
+
+    # indicators require for the bar to close then trade (not between open and close)
+    # Add the bar to the stock frame
+    stock_frame.add_rows(data=latest_bar)
+
+    # Refresh the indicators (very important)
+    indicator_client.refresh()
+
+    print("="*50)
+    print("Current Stock Frame:")
+    print("-"*50)
+    print(stock_frame.symbol_groups.tail())     # get the last 5 rows
+    print("-"*50)
+    print("")
+
+    # Check for the signals
+    signals = indicator_client.check_signals()
+
+    # Define the buy and sell signals
+    buys = signals['buys'].to_list()
+    sells = signals['sells'].to_list()
+
+    print("="*50)
+    print("Current Signals:")
+    print("-"*50)
+    print("Symbol: {}".format(trading_symbol))
+    print("Ownership Status: {}".format(ownership_dict[trading_symbol]))
+    print("Buy Signals: {}".format(buys))
+    print("Sell Signals: {}".format(sells))
+    print("-"*50)
+    print("")
+
+    # Placing orders real time (making orders)
+    if ownership_dict[trading_symbol] is False and buys:
+        # Execute trade
+        trading_robot.execute_signals(
+            signals=signals,
+            trades_to_execute=trades_dict
+        )
+        ownership_dict[trading_symbol] = True       # we bought the order
+        order: Trade = trades_dict[trading_symbol]['buy']['trade_func']
+
+    elif ownership_dict[trading_symbol] is True and sells:
+        # Execute trade
+        trading_robot.execute_signals(
+            signals=signals,
+            trades_to_execute=trades_dict
+        )
+        ownership_dict[trading_symbol] = False
+        order: Trade = trades_dict[trading_symbol]['sell']['trade_func']
+
+    # Get the last row
+    last_row = trading_robot.stock_frame.frame.tail(n=1)
+
+    # Grab the last bar timestamp
+    last_bar_timestamp = last_row.index.get_level_values(1)
+
+    # Wait till the next bar
+    trading_robot.wait_till_next_bar(last_bar_timestamp=last_bar_timestamp)
+
+    # RIGHT NOW, IF WE STOP THE CODE, IT WILL BUY THE SAME ORDER AGAIN BECAUSE WE DONT HAVE A CHECK TO SEE IF WE OWN IT ALREADY (its a choice because we could also keep buying it)
+
+    # Check the order status
+    if order:
+        order.check_status()    # check if cancelled or expired
+
+

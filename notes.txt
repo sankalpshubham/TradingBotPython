@@ -1,1 +1,2 @@
-Used Numpy, Pandas, TD Ameritrade API
+Used Pandas, TD Ameritrade API
+Trading Strategy: The Golden Cross - a bullish phenomenon when the 50-day moving average corsses above the 200-day moving average. When the market is in a long-term downtrend, the 50-day moving average is below the 200-day moving average. When uptrend begins, 50-day moving avg must cross above the 200-day moving avg (known as The Golden Cross)

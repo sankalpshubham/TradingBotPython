@@ -1,6 +1,7 @@
 from datetime import datetime
 
 from typing import List, Union, Optional, Dict
+from pyRobot.order_status import OrderStatus
 
 class Trade():
     def __init__(self):
@@ -327,3 +328,6 @@ class Trade():
     def _process_order_response(self) -> None:
         self.order_id =  self._order_response["order_id"]
         self.order_status = "QUEUED"
+
+    def check_status(self) -> object:
+        return OrderStatus(trade_obj=self)
